@@ -1,0 +1,30 @@
+{
+  "Piso 1": {
+    "imagen": "Mapa-piso1.png",
+    "Centro": {
+      "Entrada": { "x": 0.50, "y": 0.10 }
+    },
+    "Ala Izquierda": {
+      "Biblioteca": { "x": 0.14, "y": 0.30 },
+      "Baño de Hombres": { "x": 0.10, "y": 0.59 }
+      
+    },
+    "Ala Derecha": {
+      "Baño de Mujeres": { "x": 0.90, "y": 0.57 }
+    }
+
+  },
+  "Sotano": {
+    "imagen": "Mapa-Sotano.jpg",
+    "Centro": {
+      "Gimnasio": { "x": 0.50, "y": 0.20 }
+    },
+    "Ala Izquierda": {
+      "Call Center": { "x": 0.10, "y": 0.35 },
+      "escalera_izquierda": { "x": 0.28, "y": 0.83 }
+    },
+    "Ala Derecha": {
+      "escalera_derecha": { "x": 0.681, "y": 0.826 }
+    }
+  }
+}
