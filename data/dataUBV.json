@@ -1,6 +1,6 @@
 {
   "Piso 1": {
-    "svg": "assets/mapa-piso1.png",
+    "svg": "assets/Mapa-Piso1.png",
     "Ala_Este": {
       "ba": {
         "x": 0.57,
@@ -21,7 +21,7 @@
     }
   },
   "Sótano": {
-    "svg": "assets/mapa-sotano.png",
+    "svg": "assets/Mapa-Sotano.png",
     "Ala_Este": {
       "call": {
         "x": 0.916,
