@@ -1,0 +1,48 @@
+{
+  "name": "GeoUBV - Mapa Digital",
+  "short_name": "GeoUBV - Mapa Digital",
+  "description": "Mapa digital interactivo para navegación dentro de las instalaciones de la Universidad Bolivariana de Venezuela",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0041C2",
+  "dir": "ltr",
+  "lang": "es",
+  "categories": [
+    "education",
+    "navigation",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Buscar Ruta",
+      "short_name": "Ruta",
+      "description": "Calcular ruta entre dos puntos",
+      "url": "./?action=route",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
