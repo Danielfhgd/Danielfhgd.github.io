@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Mapa digital interactivo de la Universidad Bolivariana de Venezuela">
+    <meta name="theme-color" content="#0041C2">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+
+    <title>GeoUBV - Mapa Digital Interactivo</title>
+    <link rel="stylesheet" href="styles/main.css?v=1.0.9">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-titles">
+                <h1 class="header-title-main">GeoUBV</h1>
+                <h2 class="current-floor-title" id="current-floor-title">Piso 1</h2>
+            </div>
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu">
+                <button class="dropdown-toggle" id="dropdown-toggle" aria-label="Menú">
+                    <span class="menu-icon">☰</span>
+                </button>
+                <div class="dropdown-content" id="dropdown-content">
+                    <button class="dropdown-item" data-action="menu">
+                        <span class="item-icon">🏠</span>
+                        <span class="item-text">Menú Principal</span>
+                    </button>
+                    <button class="dropdown-item" data-action="help">
+                        <span class="item-icon">❓</span>
+                        <span class="item-text">¿Cómo Usar?</span>
+                    </button>
+                    <button class="dropdown-item" data-action="admin">
+                        <span class="item-icon">🔒</span>
+                        <span class="item-text">Modo Admin</span>
+                    </button>
+                    <button class="dropdown-item" data-action="admin-profile">
+                        <span class="item-icon">👤</span>
+                        <span class="item-text">Perfil Admin</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="main-container">
+        <!-- Área del Mapa -->
+        <section class="map-container">
+            <!-- Controles de Piso (Izquierda) -->
+            <div class="floor-controls">
+                <button class="floor-btn" id="floor-up" aria-label="Subir piso">▲</button>
+                <div class="floor-display" id="floor-display">1</div>
+                <button class="floor-btn" id="floor-down" aria-label="Bajar piso">▼</button>
+            </div>
+
+            <!-- Controles de Zoom (Derecha) -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoom-in" aria-label="Acercar">+</button>
+                <button class="zoom-btn" id="zoom-out" aria-label="Alejar">-</button>
+                <button class="zoom-btn" id="zoom-reset" aria-label="Restablecer zoom">⌂</button>
+                <button class="zoom-btn" id="rotate-left" aria-label="Rotar izquierda">↺</button>
+                <button class="zoom-btn" id="rotate-right" aria-label="Rotar derecha">↻</button>
+            </div>
+
+            <!-- Botón Modo Inmersivo -->
+            <button class="immersive-btn" id="immersive-btn" aria-label="Modo inmersivo">
+                <span class="immersive-icon">👁️</span>
+            </button>
+
+            <!-- Contenedor del Mapa SVG -->
+            <div class="map-wrapper" id="map-wrapper">
+                <div id="map-image-wrapper" style="position:relative; width:100%; height:100%;">
+                    <img id="map-image" class="map-svg" src="" alt="Mapa del edificio" aria-label="Mapa del edificio">
+                    <canvas id="map-canvas"
+                        style="position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Botón Calcular Ruta (Debajo del mapa) -->
+        <div class="route-button-container">
+            <button class="route-btn" id="calculate-route-btn">Calcular Ruta</button>
+        </div>
+
+        <!-- Barra de Estado para Instrucciones de Ruta -->
+        <div id="status-bar" style="
+            text-align: center; 
+            margin-top: 15px; 
+            padding: 10px; 
+            background: rgba(255,255,255,0.9); 
+            border-radius: 8px; 
+            font-weight: bold; 
+            color: #333; 
+            min-height: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            z-index: 10;
+        ">Listo para navegar</div>
+    </main>
+
+    <!-- Modal de Calcular Ruta -->
+    <div class="route-modal" id="route-modal">
+        <div class="route-modal-overlay" id="route-modal-overlay"></div>
+        <div class="route-modal-content">
+            <div class="route-modal-header">
+                <h2 class="route-modal-title">Calcular Ruta</h2>
+                <button class="route-modal-close" id="route-modal-close" aria-label="Cerrar">×</button>
+            </div>
+            <div class="route-modal-body">
+                <!-- Buscador de Origen -->
+                <div class="route-search-section">
+                    <label for="origin-search" class="route-search-label">Origen</label>
+                    <div class="route-search-wrapper">
+                        <input type="text" id="origin-search" class="route-search-input"
+                            placeholder="Buscar ubicación de origen..." autocomplete="off"
+                            aria-label="Buscar ubicación de origen">
+                        <div class="route-search-suggestions" id="origin-suggestions"></div>
+                    </div>
+                    <div class="route-error-message" id="origin-error"></div>
+                </div>
+
+                <!-- Buscador de Destino -->
+                <div class="route-search-section">
+                    <label for="destination-search" class="route-search-label">Destino</label>
+                    <div class="route-search-wrapper">
+                        <input type="text" id="destination-search" class="route-search-input"
+                            placeholder="Buscar ubicación de destino..." autocomplete="off"
+                            aria-label="Buscar ubicación de destino">
+                        <div class="route-search-suggestions" id="destination-suggestions"></div>
+                    </div>
+                    <div class="route-error-message" id="destination-error"></div>
+                </div>
+
+                <!-- Botón Calcular -->
+                <div class="route-calculate-section">
+                    <button class="route-calculate-btn" id="route-calculate-btn">Calcular</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ayuda -->
+    <div class="route-modal" id="help-modal">
+        <div class="route-modal-overlay" id="help-modal-overlay"></div>
+        <div class="route-modal-content">
+            <div class="route-modal-header">
+                <h2 class="route-modal-title">Cómo Usar la App</h2>
+                <button class="route-modal-close" id="help-modal-close" aria-label="Cerrar">×</button>
+            </div>
+            <div class="route-modal-body">
+                <div class="help-content">
+                    <section class="help-section">
+                        <h3>🗺️ Navegación del Mapa</h3>
+                        <ul>
+                            <li><strong>Zoom:</strong> Usa los botones + y - o el scroll del mouse para hacer zoom</li>
+                            <li><strong>Pan:</strong> Arrastra el mapa para moverte por él</li>
+                            <li><strong>Pisos:</strong> Cambia entre pisos usando los controles de piso</li>
+                        </ul>
+                    </section>
+
+                    <section class="help-section">
+                        <h3>🛣️ Calcular Rutas</h3>
+                        <ul>
+                            <li>Haz click en "Calcular Ruta" en el menú</li>
+                            <li>Busca tu ubicación de origen</li>
+                            <li>Busca tu destino</li>
+                            <li>Haz click en "Calcular" para ver la ruta</li>
+                        </ul>
+                    </section>
+
+                    <section class="help-section">
+                        <h3>👁️ Modo Inmersivo</h3>
+                        <ul>
+                            <li>Activa el modo inmersivo para una experiencia de pantalla completa</li>
+                            <li>Presiona ESC para salir del modo inmersivo</li>
+                        </ul>
+                    </section>
+
+                    <section class="help-section">
+                        <h3>🌙 Modo Oscuro</h3>
+                        <ul>
+                            <li>Alterna entre tema claro y oscuro usando el switch en el menú</li>
+                            <li>La preferencia se guarda automáticamente</li>
+                        </ul>
+                    </section>
+
+                    <section class="help-section">
+                        <h3>📱 Funciones Móviles</h3>
+                        <ul>
+                            <li>La app está optimizada para dispositivos móviles</li>
+                            <li>Puedes instalarla como PWA para acceso rápido</li>
+                            <li>Funciona sin conexión a internet</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modo Admin -->
+    <div class="route-modal" id="admin-modal">
+        <div class="route-modal-overlay" id="admin-modal-overlay"></div>
+        <div class="route-modal-content">
+            <div class="route-modal-header">
+                <h2 class="route-modal-title">Modo Administrador</h2>
+                <button class="route-modal-close" id="admin-modal-close" aria-label="Cerrar">×</button>
+            </div>
+            <div class="route-modal-body">
+                <form id="admin-login-form">
+                    <div class="route-search-section">
+                        <label for="admin-user" class="route-search-label">Usuario</label>
+                        <input type="text" id="admin-user" class="route-search-input" placeholder="Usuario" required
+                            autocomplete="username">
+                    </div>
+                    <div class="route-search-section">
+                        <label for="admin-password" class="route-search-label">Contraseña</label>
+                        <input type="password" id="admin-password" class="route-search-input" placeholder="Contraseña"
+                            required autocomplete="current-password">
+                    </div>
+                    <div class="route-error-message" id="admin-error-message" style="margin-bottom: 1rem;">Usuario o
+                        contraseña incorrectos</div>
+                    <div class="route-calculate-section">
+                        <button type="submit" class="route-calculate-btn">Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Perfil Admin (Migrado) -->
+    <div id="panel-admin-profile" class="admin-panel">
+        <div class="admin-panel-header">
+            <h2>Panel de Control</h2>
+            <button id="close-admin-profile" class="route-modal-close" style="font-size:1.5rem;">×</button>
+        </div>
+        <div class="admin-panel-body">
+            <p>Estás logueado como: <b>Administrador</b></p>
+            <hr>
+
+            <!-- SECCIÓN ELIMINAR (MIGRADA) -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="margin-top:0; color:#d32f2f;">Eliminar ubicación</h3>
+                <div class="form-group">
+                    <label>Seleccione la ubicación a eliminar (solo locales):</label>
+                    <select id="sel-eliminar-ubicacion" class="route-search-input"></select>
+                </div>
+                <button id="btn-eliminar-ubicacion" class="admin-action-btn danger" style="width:100%;">Eliminar
+                    ubicación seleccionada</button>
+            </div>
+
+            <h3>Configuración GitHub</h3>
+            <div class="form-group">
+                <label>Usuario/Organización:</label>
+                <input type="text" id="github-user" placeholder="tu-usuario" class="route-search-input">
+            </div>
+            <div class="form-group">
+                <label>Repositorio:</label>
+                <input type="text" id="github-repo" placeholder="nombre-repo" class="route-search-input">
+            </div>
+            <div class="form-group">
+                <label>Token GitHub:</label>
+                <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" class="route-search-input">
+            </div>
+            <div class="form-group" style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label>Rama:</label>
+                    <input type="text" id="github-branch" placeholder="main" class="route-search-input">
+                </div>
+                <div style="flex:2;">
+                    <label>Ruta archivo:</label>
+                    <input type="text" id="github-path" placeholder="data/dataUBV.json" class="route-search-input">
+                </div>
+            </div>
+            <button id="btn-save-github-config" class="route-btn small" style="margin-top:10px;">Guardar Config</button>
+            <hr>
+
+            <h3>JSON generado</h3>
+            <textarea id="json-output-admin" class="json-area" readonly></textarea>
+
+            <div class="admin-actions">
+                <button id="btn-copy-json" class="admin-action-btn">Copiar JSON</button>
+                <button id="btn-download-json" class="admin-action-btn">Descargar JSON</button>
+                <button id="btn-save-github" class="admin-action-btn danger">💾 Guardar en GitHub</button>
+            </div>
+
+            <div id="github-status" class="status-msg"></div>
+
+            <hr>
+            <div class="admin-footer">
+                <button id="btn-reset-local" class="admin-action-btn warning">Resetear Cambios Locales</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Ubicación (Migrado) -->
+    <div id="modal-agregar" class="route-modal">
+        <div class="route-modal-overlay"></div>
+        <div class="route-modal-content">
+            <div class="route-modal-header">
+                <h2 class="route-modal-title">Agregar Ubicación</h2>
+                <button id="modal-agregar-close" class="route-modal-close">×</button>
+            </div>
+            <div class="route-modal-body">
+                <div class="form-group">
+                    <label>Nombre del lugar:</label>
+                    <input type="text" id="modal-agregar-nombre" class="route-search-input" placeholder="Ej: Aula 305">
+                </div>
+                <div class="form-group">
+                    <label>Sector:</label>
+                    <select id="modal-agregar-sector" class="route-search-input">
+                        <option value="Ala_Oeste">Ala Oeste</option>
+                        <option value="Centro">Centro</option>
+                        <option value="Ala_Este">Ala Este</option>
+                    </select>
+                </div>
+                <div class="route-calculate-section"
+                    style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+                    <button id="btn-cancelar-agregar" class="route-btn" style="background:#666;">Cancelar</button>
+                    <button id="btn-confirmar-agregar" class="route-btn">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="scripts/app.js"></script>
+    <script src="scripts/headerScroll.js"></script>
+</body>
+
+</html>
