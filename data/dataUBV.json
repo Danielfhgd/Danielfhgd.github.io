@@ -1,4 +1,7 @@
 {
+  "Piso 2":{
+    "svg":"assets/Mapa-Piso2.png",
+  }
   "Piso 1": {
     "svg": "assets/Mapa-Piso1.png",
     "Ala_Este": {
